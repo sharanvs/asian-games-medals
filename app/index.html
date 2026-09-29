@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aichi-Nagoya 2026 Asian Games — Medal Tally + India Alerts</title>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,Arial,sans-serif;margin:0;background:#f4f6fb;color:#16213a}
+header{background:linear-gradient(90deg,#ff9933,#ffffff,#138808);color:#111;padding:16px;text-align:center}
+header h1{margin:0;font-size:1.4rem}header p{margin:4px 0 0;font-size:.9rem}
+.wrap{max-width:900px;margin:auto;padding:16px}
+.india-card{background:#ffffff;border:2px solid #ffb400;border-radius:12px;padding:16px;margin:16px 0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.india-card .nums{display:flex;gap:12px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.pill{background:#eef3ff;border:1px solid #c9d6f2;border-radius:10px;padding:10px 18px;min-width:90px;color:#16213a}
+.pill b{font-size:1.5rem;display:block}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+button,input,select{padding:10px;border-radius:8px;border:1px solid #b9c4d8;background:#ffffff;color:#16213a;font-size:1rem}
+button{cursor:pointer;background:#ffb400;color:#111;font-weight:700;border:none}
+table{width:100%;border-collapse:collapse;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+th,td{padding:10px;text-align:center;font-size:.95rem}
+th{background:#1e2f63;color:#fff}tr.ind{ background:#fff3d6 !important;font-weight:800}
+tr:nth-child(even){background:#f1f5fd}
+#alerts{position:fixed;bottom:12px;right:12px;display:flex;flex-direction:column;gap:8px;max-width:320px}
+.toast{background:#ffb400;color:#111;padding:12px;border-radius:10px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.4);animation:pop .3s}
+@keyframes pop{from{transform:translateY(10px);opacity:0}}
+ul{line-height:1.6}
+.small{color:#5a6b8c;font-size:.85rem}
+h2{color:#16213a}
+#alertState{background:#eef3ff;border:1px solid #c9d6f2;border-radius:8px;padding:8px 12px}
+</style>
+</head>
+<body>
+<header>
+<h1>🏅 Aichi-Nagoya 2026 Asian Games — Medal Tally</h1>
+<p id="meta">Loading…</p>
+</header>
+<div class="wrap">
+<div class="india-card" id="indiaCard"><h2 style="margin:0">🇮🇳 INDIA — Rank <span id="indRank">–</span></h2>
+<div class="nums">
+<div class="pill">🥇<b id="indG">–</b>Gold</div>
+<div class="pill">🥈<b id="indS">–</b>Silver</div>
+<div class="pill">🥉<b id="indB">–</b>Bronze</div>
+<div class="pill">🏆<b id="indT">–</b>Total</div>
+</div>
+<p class="small">Alerts fire automatically when India's medal count increases.</p>
+</div>
+<div class="controls">
+<button id="btnNotify">🔔 Enable alerts</button>
+<button id="btnRefresh">↻ Refresh tally</button>
+<select id="sort"><option value="rank">Sort: Rank</option><option value="gold">Sort: Gold</option><option value="total">Sort: Total</option></select>
+<input id="q" placeholder="Search country…">
+</div>
+<p class="small" id="alertState">Checking alert status…</p>
+<p class="small" id="status"></p>
+<p class="small" id="verline">Asian Games Medals app v2.2 • background alerts ON • latest India medals update live from official results</p>
+<table><thead><tr><th>#</th><th>Country</th><th>🥇</th><th>🥈</th><th>🥉</th><th>Total</th></tr></thead>
+<tbody id="tbody"></tbody></table>
+<h2>🇮🇳 Latest India medals</h2>
+<ul id="recent"></ul>
+<p class="small">Data priority: <b id="src">connecting…</b> — 1) official Aichi-Nagoya 2026 results system, 2) Wikipedia medal table, 3) bundled Sep-26 snapshot. Auto-refresh every 2 min (+ on every app open); every new India medal triggers sound + toast (+ system notification where supported).</p>
+</div>
+<div id="alerts"></div>
+<script>
+let prev=null, tally=[];
+const $=id=>document.getElementById(id);
+// Bundled offline snapshot (embedded so the app works on file:// with no fetch)
+const BUNDLED={"games":"Aichi-Nagoya 2026 Asian Games (20th Asian Games, Sep 19 - Oct 4 2026)","updated":"2026-09-26T06:30:00Z","tally":[{"rank":1,"country":"China","code":"CHN","gold":98,"silver":37,"bronze":25,"total":160},{"rank":2,"country":"Japan","code":"JPN","gold":29,"silver":43,"bronze":44,"total":116},{"rank":3,"country":"South Korea","code":"KOR","gold":13,"silver":17,"bronze":34,"total":64},{"rank":4,"country":"Kazakhstan","code":"KAZ","gold":8,"silver":8,"bronze":14,"total":30},{"rank":5,"country":"Uzbekistan","code":"UZB","gold":7,"silver":15,"bronze":9,"total":31},{"rank":6,"country":"Thailand","code":"THA","gold":7,"silver":6,"bronze":8,"total":21},{"rank":7,"country":"Iran","code":"IRI","gold":6,"silver":11,"bronze":7,"total":24},{"rank":8,"country":"Hong Kong, China","code":"HKG","gold":4,"silver":11,"bronze":11,"total":26},{"rank":9,"country":"North Korea","code":"PRK","gold":4,"silver":4,"bronze":3,"total":11},{"rank":10,"country":"Bahrain","code":"BRN","gold":4,"silver":2,"bronze":2,"total":8},{"rank":11,"country":"Malaysia","code":"MAS","gold":4,"silver":1,"bronze":5,"total":10},{"rank":12,"country":"India","code":"IND","gold":2,"silver":10,"bronze":12,"total":24},{"rank":13,"country":"Chinese Taipei","code":"TPE","gold":2,"silver":5,"bronze":16,"total":23},{"rank":14,"country":"Philippines","code":"PHI","gold":2,"silver":2,"bronze":5,"total":9},{"rank":15,"country":"Qatar","code":"QAT","gold":2,"silver":2,"bronze":1,"total":5},{"rank":16,"country":"Kuwait","code":"KUW","gold":2,"silver":1,"bronze":2,"total":5},{"rank":17,"country":"Tajikistan","code":"TJK","gold":2,"silver":1,"bronze":1,"total":4},{"rank":18,"country":"Singapore","code":"SGP","gold":1,"silver":5,"bronze":3,"total":9},{"rank":19,"country":"Indonesia","code":"INA","gold":1,"silver":4,"bronze":17,"total":22},{"rank":20,"country":"Macao, China","code":"MAC","gold":1,"silver":4,"bronze":1,"total":6},{"rank":21,"country":"Vietnam","code":"VIE","gold":1,"silver":1,"bronze":16,"total":18}],"indiaRecent":[{"date":"2026-09-26","event":"Athletics — Men's Marathon","athlete":"Sawan Barwal","medal":"Silver","note":"National record 2:11:37, India's 24th medal"},{"date":"2026-09-25","event":"Shooting — 10m Air Pistol Mixed Team","athlete":"Suruchi Singh / Kamaljeet","medal":"Gold","note":"Asian record 484.6"},{"date":"2026-09-25","event":"Shooting — Men's 50m Rifle 3P Team","athlete":"Aishwary Pratap Singh Tomar, Rudrankksh Patil, Niraj Kumar","medal":"Silver","note":""},{"date":"2026-09-25","event":"Athletics — Women's Shot Put","athlete":"Manpreet Kaur","medal":"Bronze","note":""},{"date":"2026-09-25","event":"Table Tennis — Mixed Doubles","athlete":"Manush Shah / Diya Chitale","medal":"Bronze","note":""}]};
+const LIVE_URL='https://en.wikipedia.org/w/api.php?action=parse&page=2026%20Asian%20Games%20medal%20table&prop=text&format=json&origin=*';
+const CODES={China:'CHN',Japan:'JPN','South Korea':'KOR',Kazakhstan:'KAZ',Uzbekistan:'UZB',Thailand:'THA',Iran:'IRI','Hong Kong':'HKG','Hong Kong, China':'HKG','North Korea':'PRK','DPR Korea':'PRK',Bahrain:'BRN',Malaysia:'MAS',India:'IND','Chinese Taipei':'TPE',Philippines:'PHI',Qatar:'QAT',Kuwait:'KUW',Tajikistan:'TJK',Singapore:'SGP',Indonesia:'INA','Macao, China':'MAC',Macau:'MAC',Vietnam:'VIE',Jordan:'JOR',Myanmar:'MYA','Saudi Arabia':'KSA',Kyrgyzstan:'KGZ',Afghanistan:'AFG',Iraq:'IRQ',Lebanon:'LBN',Oman:'OMA','Sri Lanka':'SRI',Turkmenistan:'TKM',Cambodia:'CAM',Nepal:'NEP',Pakistan:'PAK',Bangladesh:'BAN',Brunei:'BRU','Brunei Darussalam':'BRU',Mongolia:'MGL',Syria:'SYR','Syrian Arab Republic':'SYR',Laos:'LAO',Bhutan:'BHU',Maldives:'MDV',Yemen:'YEM',Palestine:'PLE',Timor:'TLS'};
+function codeFor(n){ return CODES[n]||n.replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase(); }
+async function fetchLive(){
+ const ctl=new AbortController(); const t=setTimeout(()=>ctl.abort(),20000);
+ try{
+  const r=await fetch(LIVE_URL,{signal:ctl.signal}); const j=await r.json();
+  const doc=new DOMParser().parseFromString(j.parse.text['*'],'text/html');
+  const tbl=[...doc.querySelectorAll('table.wikitable')].find(x=>/Gold/i.test(x.textContent));
+  const out=[]; let i=0;
+  for(const tr of tbl.querySelectorAll('tr')){
+   const cells=[...tr.children]; if(cells.length<6) continue;
+   const a=cells[1].querySelector('a');
+   const nation=(a?a.textContent:cells[1].textContent).replace(/ /g,' ').trim();
+   if(!nation||/^total$/i.test(nation)) continue;
+   const nums=cells.slice(2,6).map(td=>parseInt(td.textContent.replace(/,/g,'').trim(),10));
+   if(nums.some(isNaN)) continue;
+   i++; out.push({rank:parseInt(cells[0].textContent,10)||i,country:nation,code:codeFor(nation),gold:nums[0],silver:nums[1],bronze:nums[2],total:nums[3]});
+  }
+  if(!out.some(x=>x.code==='IND')) throw new Error('no India row');
+  return out;
+ }finally{ clearTimeout(t); }
+}
+function recentHTML(){ return BUNDLED.indiaRecent.map(m=>`<li><b>${m.medal}</b> — ${m.event} (${m.athlete}) <span class="small">${m.date} ${m.note||''}</span></li>`).join(''); }
+let officialSettled=false;
+// Called by native Android code with the OFFICIAL results JSON (no CORS limits there)
+window.onOfficialData=function(jsonText,medText){
+ try{
+  const rows=JSON.parse(jsonText);
+  const out=[];
+  for(const r of rows){
+   if(!r.Count||!r.Count.total) continue;
+   const tot=r.Count.total.total||0;
+   if(tot<=0) continue;
+   const rk=parseInt(r.Rk,10);
+   out.push({rank:isNaN(rk)?999:rk,rankEq:!!r.RkEq,country:r.OrgDesc||r.Org,code:r.Org,
+    gold:r.Count.ME_GOLD.total,silver:r.Count.ME_SILVER.total,bronze:r.Count.ME_BRONZE.total,total:tot});
+  }
+  if(!out.some(x=>x.code==='IND')) throw new Error('no India row');
+  out.sort((a,b)=>a.rank-b.rank);
+  officialSettled=true;
+  applyTally(out,'● LIVE — Official Aichi-Nagoya 2026 results',true);
+  if(medText){ try{ renderRecentFromOfficial(JSON.parse(medText)); }catch(e){} }
+ }catch(e){ window.onOfficialError(String((e&&e.message)||e)); }
+};
+function renderRecentFromOfficial(list){
+ const icon={ME_GOLD:'🥇 Gold',ME_SILVER:'🥈 Silver',ME_BRONZE:'🥉 Bronze'};
+ const order={ME_GOLD:0,ME_SILVER:1,ME_BRONZE:2};
+ const groups={};
+ for(const m of list){
+  if(!m.EventDesc||!m.Medal) continue;
+  const key=(m.DateRaw||'').slice(0,10)+'|'+m.EventDesc+'|'+m.Medal;
+  const g=groups[key]=groups[key]||{d:m.DateRaw||'',event:m.EventDesc,disc:m.DiscDesc||'',medal:m.Medal,names:[]};
+  if(m.Name) g.names.push(m.Name);
+ }
+ const g=Object.values(groups).sort((a,b)=>(b.d||'').localeCompare(a.d||'')||(order[a.medal]-order[b.medal])).slice(0,10);
+ if(!g.length) return;
+ $('recent').innerHTML=g.map(x=>`<li><b>${icon[x.medal]||x.medal}</b> — ${x.event}${x.disc?' ('+x.disc+')':''}<br><span class="small">${x.names.join(', ')}${x.d?' • '+x.d.slice(0,10):''}</span></li>`).join('');
+}
+window.onOfficialError=function(msg){ try{ window.__officialErr=String(msg||'unknown').slice(0,160); }catch(e){} };
+function applyTally(list,label,isLive){
+ tally=list;
+ const ind=tally.find(t=>t.code==='IND');
+ render();
+ $('indRank').textContent=(ind.rankEq?'=':'')+ind.rank; $('indG').textContent=ind.gold;
+ $('indS').textContent=ind.silver; $('indB').textContent=ind.bronze; $('indT').textContent=ind.total;
+ $('recent').innerHTML=recentHTML();
+ // best-seen tracking: avoids repeat alerts when live sources disagree/flap
+ let best=null;
+ try{ best=JSON.parse(localStorage.getItem('indBest')||'null'); }catch(e){}
+ try{
+  if(window.Android&&window.Android.getBest){
+   const nb=JSON.parse(window.Android.getBest());
+   if(nb&&(nb.total||nb.gold||nb.silver||nb.bronze)){
+    best=best?{gold:Math.max(best.gold,nb.gold),silver:Math.max(best.silver,nb.silver),bronze:Math.max(best.bronze,nb.bronze),total:Math.max(best.total,nb.total)}:nb;
+   }
+  }
+ }catch(e){}
+ if(best && prevValChanged(best,ind)){ fireAlert(best,ind); }
+ if(!best) best={gold:ind.gold,silver:ind.silver,bronze:ind.bronze,total:ind.total};
+ else best={gold:Math.max(best.gold,ind.gold),silver:Math.max(best.silver,ind.silver),bronze:Math.max(best.bronze,ind.bronze),total:Math.max(best.total,ind.total)};
+ try{ localStorage.setItem('indBest',JSON.stringify(best)); }catch(e){}
+ prev={...ind};
+ $('meta').textContent=BUNDLED.games+(isLive?' • ● LIVE':' • ○ offline snapshot '+BUNDLED.updated);
+ $('src').textContent=label;
+ refreshStatus();
+}
+async function load(){
+ officialSettled=false;
+ try{ if(window.Android&&window.Android.refreshOfficial){ window.Android.refreshOfficial(); } }catch(e){}
+ setTimeout(async ()=>{
+  if(officialSettled) return;
+  const oerr=(window.__officialErr?(' (official feed error: '+window.__officialErr+')'):' (official feed unreachable: using fallback)');
+  try{
+   const live=await fetchLive();
+   if(!officialSettled) applyTally(live,'● LIVE — Wikipedia 2026 Asian Games medal table'+oerr,true);
+  }catch(e){
+   if(!officialSettled) applyTally(BUNDLED.tally,'○ offline snapshot (Sep 26)'+oerr,false);
+  }
+ },9000);
+}
+function prevValChanged(a,b){ return b.gold>a.gold||b.silver>a.silver||b.bronze>a.bronze||b.total>a.total; }
+function diffText(a,b){
+ const d=[]; if(b.gold>a.gold)d.push(`+${b.gold-a.gold} Gold 🥇`); if(b.silver>a.silver)d.push(`+${b.silver-a.silver} Silver 🥈`); if(b.bronze>a.bronze)d.push(`+${b.bronze-a.bronze} Bronze 🥉`); return d.join(', ')||`Total now ${b.total}`;
+}
+function alertsOn(){ try{ return localStorage.getItem('alertsOn')!=='0'; }catch(e){ return true; } }
+function updateAlertUI(){
+ const on=alertsOn();
+ const b=$('btnNotify');
+ b.textContent=on?'🔔 Alerts ON — tap to mute':'🔕 Alerts OFF — tap to enable';
+ b.style.background=on?'#138808':'#ffb400'; b.style.color=on?'#fff':'#111';
+ $('alertState').textContent=on?'✅ India medal alerts are ON — toast + sound (+ system notification where supported) on every new medal.':'⚠️ Alerts are OFF — you will NOT be notified of new India medals. Tap the button above to enable.';
+ refreshStatus();
+}
+function refreshStatus(){
+ try{ $('status').textContent='Last checked: '+new Date().toLocaleString()+' • auto-refresh every 2 min • Alerts: '+(alertsOn()?'ON ✅':'OFF ⚠️'); }catch(e){}
+}
+function fireAlert(oldv,newv){
+ if(!alertsOn()) return;
+ const msg=`🇮🇳 NEW MEDAL FOR INDIA! ${diffText(oldv,newv)} — Total: ${newv.total} (G${newv.gold} S${newv.silver} B${newv.bronze})`;
+ toast(msg); beep();
+ try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('India wins medal! 🎉',{body:msg}); } }catch(e){}
+}
+function toast(msg){ const d=document.createElement('div'); d.className='toast'; d.textContent=msg; $('alerts').appendChild(d); setTimeout(()=>d.remove(),9000); }
+let AC=null;
+function ac(){ try{ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } } if(AC&&AC.state==='suspended'){ AC.resume(); } }catch(e){} return AC; }
+document.addEventListener('pointerdown',()=>ac());
+function beep(){ try{ const c=ac(); if(!c) return; const o=c.createOscillator(),g=c.createGain(); o.connect(g);g.connect(c.destination); o.frequency.value=880; o.start(); g.gain.exponentialRampToValueAtTime(.001,c.currentTime+1); o.stop(c.currentTime+1);}catch(e){} }
+function render(){
+ const q=$('q').value.toLowerCase(), s=$('sort').value;
+ let rows=[...tally].filter(t=>t.country.toLowerCase().includes(q));
+ if(s==='gold')rows.sort((a,b)=>b.gold-a.gold||b.silver-a.silver||b.bronze-a.bronze);
+ else if(s==='total')rows.sort((a,b)=>b.total-a.total); else rows.sort((a,b)=>a.rank-b.rank);
+ $('tbody').innerHTML=rows.map(t=>`<tr class="${t.code==='IND'?'ind':''}"><td>${t.rankEq?'=':''}${t.rank}</td><td style="text-align:left">${t.code==='IND'?'🇮🇳 ':''}${t.country}</td><td>${t.gold}</td><td>${t.silver}</td><td>${t.bronze}</td><td><b>${t.total}</b></td></tr>`).join('');
+}
+$('btnNotify').onclick=async()=>{
+ try{
+  if(!alertsOn()){
+   let sys='in-app toast + sound';
+   try{
+    if('Notification' in window){ const p=await Notification.requestPermission(); sys=(p==='granted')?'system notification + in-app':'in-app only (system blocked)'; }
+    else{ sys='in-app only (system notifications not supported in this view)'; }
+   }catch(e){}
+   localStorage.setItem('alertsOn','1'); updateAlertUI();
+   toast('🔔 Alerts enabled! ('+sys+')'); beep();
+  }else{
+   localStorage.setItem('alertsOn','0'); updateAlertUI(); toast('🔕 Alerts muted. Tap again to re-enable.');
+  }
+ }catch(e){ toast('Alert toggle failed: '+e.message); }
+};
+$('btnRefresh').onclick=()=>load();
+$('q').oninput=render; $('sort').onchange=render;
+updateAlertUI(); load(); setInterval(()=>load(),120000);
+</script>
+</body>
+</html>

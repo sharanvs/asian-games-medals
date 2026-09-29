@@ -1,0 +1,35 @@
+{
+  "games": "Aichi-Nagoya 2026 Asian Games (20th Asian Games, Sep 19 - Oct 4 2026)",
+  "updated": "2026-09-26T06:30:00Z",
+  "source": "Compiled from KhelNow / Indian Express / Sportstar live blogs",
+  "tally": [
+    {"rank": 1, "country": "China", "code": "CHN", "gold": 98, "silver": 37, "bronze": 25, "total": 160},
+    {"rank": 2, "country": "Japan", "code": "JPN", "gold": 29, "silver": 43, "bronze": 44, "total": 116},
+    {"rank": 3, "country": "South Korea", "code": "KOR", "gold": 13, "silver": 17, "bronze": 34, "total": 64},
+    {"rank": 4, "country": "Kazakhstan", "code": "KAZ", "gold": 8, "silver": 8, "bronze": 14, "total": 30},
+    {"rank": 5, "country": "Uzbekistan", "code": "UZB", "gold": 7, "silver": 15, "bronze": 9, "total": 31},
+    {"rank": 6, "country": "Thailand", "code": "THA", "gold": 7, "silver": 6, "bronze": 8, "total": 21},
+    {"rank": 7, "country": "Iran", "code": "IRI", "gold": 6, "silver": 11, "bronze": 7, "total": 24},
+    {"rank": 8, "country": "Hong Kong, China", "code": "HKG", "gold": 4, "silver": 11, "bronze": 11, "total": 26},
+    {"rank": 9, "country": "North Korea", "code": "PRK", "gold": 4, "silver": 4, "bronze": 3, "total": 11},
+    {"rank": 10, "country": "Bahrain", "code": "BRN", "gold": 4, "silver": 2, "bronze": 2, "total": 8},
+    {"rank": 11, "country": "Malaysia", "code": "MAS", "gold": 4, "silver": 1, "bronze": 5, "total": 10},
+    {"rank": 12, "country": "India", "code": "IND", "gold": 2, "silver": 10, "bronze": 12, "total": 24},
+    {"rank": 13, "country": "Chinese Taipei", "code": "TPE", "gold": 2, "silver": 5, "bronze": 16, "total": 23},
+    {"rank": 14, "country": "Philippines", "code": "PHI", "gold": 2, "silver": 2, "bronze": 5, "total": 9},
+    {"rank": 15, "country": "Qatar", "code": "QAT", "gold": 2, "silver": 2, "bronze": 1, "total": 5},
+    {"rank": 16, "country": "Kuwait", "code": "KUW", "gold": 2, "silver": 1, "bronze": 2, "total": 5},
+    {"rank": 17, "country": "Tajikistan", "code": "TJK", "gold": 2, "silver": 1, "bronze": 1, "total": 4},
+    {"rank": 18, "country": "Singapore", "code": "SGP", "gold": 1, "silver": 5, "bronze": 3, "total": 9},
+    {"rank": 19, "country": "Indonesia", "code": "INA", "gold": 1, "silver": 4, "bronze": 17, "total": 22},
+    {"rank": 20, "country": "Macao, China", "code": "MAC", "gold": 1, "silver": 4, "bronze": 1, "total": 6},
+    {"rank": 21, "country": "Vietnam", "code": "VIE", "gold": 1, "silver": 1, "bronze": 16, "total": 18}
+  ],
+  "indiaRecent": [
+    {"date": "2026-09-26", "event": "Athletics — Men's Marathon", "athlete": "Sawan Barwal", "medal": "Silver", "note": "National record 2:11:37, India's 24th medal"},
+    {"date": "2026-09-25", "event": "Shooting — 10m Air Pistol Mixed Team", "athlete": "Suruchi Singh / Kamaljeet", "medal": "Gold", "note": "Asian record 484.6"},
+    {"date": "2026-09-25", "event": "Shooting — Men's 50m Rifle 3P Team", "athlete": "Aishwary Pratap Singh Tomar, Rudrankksh Patil, Niraj Kumar", "medal": "Silver", "note": ""},
+    {"date": "2026-09-25", "event": "Athletics — Women's Shot Put", "athlete": "Manpreet Kaur", "medal": "Bronze", "note": ""},
+    {"date": "2026-09-25", "event": "Table Tennis — Mixed Doubles", "athlete": "Manush Shah / Diya Chitale", "medal": "Bronze", "note": ""}
+  ]
+}

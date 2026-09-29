@@ -1,0 +1,26 @@
+# Release signing keys — NEVER commit these
+*.jks
+*.p12
+*.pfx
+key.pem
+cert.pem
+keystore*
+
+# Build outputs / SDK downloads
+apkproj/out/
+*.dex
+sdk/
+tmp/
+tmpj/
+*.tmp
+
+# Toolchain / scratch
+/data/
+_sa.der
+_sig.bin
+_pub.pem
+m_*.bin
+m_*.pem
+o_*.bin
+o_*.pem
+sign.js.bak
